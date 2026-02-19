@@ -1,81 +1,85 @@
-import React, { useState } from 'react';
-import { Alert, KeyboardAvoidingView, Platform, SafeAreaView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
-import { supabase } from '../../supabase';
+import React from 'react';
+import { FlatList, StyleSheet, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { ThemedText } from '@/components/themed-text';
+import { ThemedView } from '@/components/themed-view';
+import { Card } from '@/components/ui/card';
+import { Avatar } from '@/components/ui/avatar';
+import { Button } from '@/components/ui/button';
 
-export default function LoginScreen() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [loading, setLoading] = useState(false);
+const MOCK_FRIENDS = [
+  { id: '1', name: 'Ana Garcia', bio: 'Amante del senderismo y el café ☕️', initials: 'AG' },
+  { id: '2', name: 'Carlos Ruiz', bio: 'Tech lover y gamer 🎮', initials: 'CR' },
+  { id: '3', name: 'Elena Lopez', bio: 'Viajera y fotógrafa 📸', initials: 'EL' },
+  { id: '4', name: 'Miguel Torres', bio: 'Músico y soñador 🎸', initials: 'MT' },
+];
 
-  async function signInWithEmail() {
-    setLoading(true);
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
-    if (error) Alert.alert('Error', error.message);
-    setLoading(false);
-  }
-
-  async function signUpWithEmail() {
-    setLoading(true);
-    const { error } = await supabase.auth.signUp({ email, password });
-    if (error) Alert.alert('Error', error.message);
-    else Alert.alert('¡Súper!', 'Revisa tu correo para verificar tu cuenta.');
-    setLoading(false);
-  }
+export default function HomeScreen() {
+  const renderItem = ({ item }: { item: typeof MOCK_FRIENDS[0] }) => (
+    <Card style={styles.card}>
+      <View style={styles.cardHeader}>
+        <Avatar initials={item.initials} />
+        <View style={styles.textContainer}>
+          <ThemedText type="defaultSemiBold">{item.name}</ThemedText>
+          <ThemedText style={styles.bio}>{item.bio}</ThemedText>
+        </View>
+      </View>
+      <Button title="Conectar" variant="secondary" style={styles.button} onPress={() => {}} />
+    </Card>
+  );
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={styles.container}>
-        
+    <ThemedView style={{ flex: 1 }}>
+      <SafeAreaView edges={['top']} style={styles.container}>
         <View style={styles.header}>
-          <Text style={styles.logo}>👋 SoloAmigos</Text>
-          <Text style={styles.subtitle}>Conecta. Sal. Haz amigos de verdad.</Text>
+          <ThemedText type="title">Descubre</ThemedText>
+          <ThemedText style={styles.subtitle}>Gente increíble cerca de ti</ThemedText>
         </View>
-
-        <View style={styles.form}>
-          <TextInput
-            style={styles.input}
-            onChangeText={setEmail}
-            value={email}
-            placeholder="Correo electrónico"
-            placeholderTextColor="#94a3b8"
-            autoCapitalize={'none'}
-            keyboardType="email-address"
-          />
-          <TextInput
-            style={styles.input}
-            onChangeText={setPassword}
-            value={password}
-            secureTextEntry={true}
-            placeholder="Contraseña"
-            placeholderTextColor="#94a3b8"
-            autoCapitalize={'none'}
-          />
-
-          <TouchableOpacity style={styles.primaryButton} disabled={loading} onPress={signInWithEmail}>
-            <Text style={styles.primaryButtonText}>Iniciar Sesión</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity style={styles.secondaryButton} disabled={loading} onPress={signUpWithEmail}>
-            <Text style={styles.secondaryButtonText}>Crear Cuenta</Text>
-          </TouchableOpacity>
-        </View>
-
-      </KeyboardAvoidingView>
-    </SafeAreaView>
+        <FlatList
+          data={MOCK_FRIENDS}
+          renderItem={renderItem}
+          keyExtractor={(item) => item.id}
+          contentContainerStyle={styles.listContent}
+          showsVerticalScrollIndicator={false}
+        />
+      </SafeAreaView>
+    </ThemedView>
   );
 }
 
-// Aquí es donde estaba el problema, ¡esta es la lista completa de estilos!
 const styles = StyleSheet.create({
-  safeArea: { flex: 1, backgroundColor: '#ffffff' },
-  container: { flex: 1, paddingHorizontal: 30, justifyContent: 'center' },
-  header: { marginBottom: 50, alignItems: 'center' },
-  logo: { fontSize: 36, fontWeight: '900', color: '#0f172a', marginBottom: 10, letterSpacing: -1 },
-  subtitle: { fontSize: 16, color: '#64748b', textAlign: 'center', fontWeight: '500' },
-  form: { width: '100%' },
-  input: { backgroundColor: '#f1f5f9', borderRadius: 16, padding: 20, fontSize: 16, marginBottom: 16, color: '#0f172a', fontWeight: '500' },
-  primaryButton: { backgroundColor: '#4f46e5', borderRadius: 100, padding: 20, alignItems: 'center', marginTop: 10, shadowColor: '#4f46e5', shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.3, shadowRadius: 10, elevation: 5 },
-  primaryButtonText: { color: '#ffffff', fontSize: 18, fontWeight: 'bold' },
-  secondaryButton: { backgroundColor: 'transparent', borderRadius: 100, padding: 20, alignItems: 'center', marginTop: 15, borderWidth: 2, borderColor: '#e2e8f0' },
-  secondaryButtonText: { color: '#0f172a', fontSize: 18, fontWeight: 'bold' }
+  container: {
+    flex: 1,
+    paddingHorizontal: 20,
+  },
+  header: {
+    marginVertical: 20,
+  },
+  subtitle: {
+    opacity: 0.6,
+    fontSize: 16,
+  },
+  listContent: {
+    paddingBottom: 20,
+  },
+  card: {
+    marginBottom: 16,
+  },
+  cardHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  textContainer: {
+    marginLeft: 12,
+    flex: 1,
+  },
+  bio: {
+    opacity: 0.7,
+    marginTop: 2,
+  },
+  button: {
+    marginTop: 8,
+    paddingVertical: 10,
+  },
 });
