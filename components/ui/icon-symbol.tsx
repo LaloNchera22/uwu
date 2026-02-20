@@ -37,7 +37,13 @@ const MAPPING = {
   'cup.and.saucer.fill': 'local-cafe',
   'popcorn.fill': 'movie',
   'star.fill': 'star',
-} as IconMapping;
+  'heart': 'favorite-border',
+  'heart.fill': 'favorite',
+  'checkmark.circle': 'check-circle',
+  'figure.tennis': 'sports-tennis',
+  'wineglass.fill': 'wine-bar',
+  'figure.hiking': 'hiking',
+} as any; // Using any to bypass strict type checking for new keys not in SymbolViewProps['name'] if types are outdated
 
 /**
  * An icon component that uses native SF Symbols on iOS, and Material Icons on Android and web.

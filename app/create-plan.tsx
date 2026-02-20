@@ -9,11 +9,14 @@ import {
   Platform,
   KeyboardAvoidingView,
   useColorScheme,
-  StatusBar
+  StatusBar,
+  Alert,
+  ActivityIndicator
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { MaterialIcons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { supabase } from '@/supabase';
 
 // Colors from design reference
 const COLORS = {
@@ -39,6 +42,7 @@ export default function CreatePlanScreen() {
   const [selectedCategory, setSelectedCategory] = useState('coffee');
   const [planTitle, setPlanTitle] = useState('Café y charla tranquila');
   const [groupSize, setGroupSize] = useState(4);
+  const [loading, setLoading] = useState(false);
 
   const theme = {
     background: isDark ? COLORS.backgroundDark : COLORS.backgroundLight,
@@ -55,6 +59,66 @@ export default function CreatePlanScreen() {
     { id: 'drinks', label: 'Drinks', icon: '🍻' },
     { id: 'games', label: 'Juegos', icon: '🎲' },
   ];
+
+  async function handleCreatePlan() {
+    if (!planTitle.trim()) {
+      Alert.alert('Error', 'Por favor escribe un título para el plan');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        Alert.alert('Error', 'Debes iniciar sesión para crear un plan');
+        setLoading(false);
+        return;
+      }
+
+      // 1. Insert Plan
+      const { data: planData, error: planError } = await supabase
+        .from('plans')
+        .insert({
+          creator_id: user.id,
+          category: categories.find(c => c.id === selectedCategory)?.label || 'General',
+          activity_type: categories.find(c => c.id === selectedCategory)?.icon || 'star',
+          title: planTitle,
+          description: '',
+          image_url: 'https://images.unsplash.com/photo-1511632765486-a01980e01a18?q=80&w=2070&auto=format&fit=crop',
+          max_spots: groupSize,
+          event_date: new Date(Date.now() + 86400000).toISOString(), // Tomorrow
+          location_name: 'Madrid, España',
+          latitude: 40.4168,
+          longitude: -3.7038,
+          status: 'open',
+        })
+        .select()
+        .single();
+
+      if (planError) throw planError;
+
+      // 2. Add Creator as Participant
+      const { error: participantError } = await supabase
+        .from('plan_participants')
+        .insert({
+          plan_id: planData.id,
+          profile_id: user.id,
+          status: 'confirmed',
+        });
+
+      if (participantError) throw participantError;
+
+      Alert.alert('¡Éxito!', 'Plan creado correctamente', [
+        { text: 'OK', onPress: () => router.back() }
+      ]);
+
+    } catch (error: any) {
+      console.error(error);
+      Alert.alert('Error', error.message || 'No se pudo crear el plan');
+    } finally {
+      setLoading(false);
+    }
+  }
 
   const suggestions = [
     'Café de especialidad ☕️',
@@ -252,9 +316,19 @@ export default function CreatePlanScreen() {
           </View>
         </View>
 
-        <TouchableOpacity style={styles.launchButton}>
-           <Text style={styles.launchButtonText}>Lanzar Plan</Text>
-           <MaterialIcons name="rocket-launch" size={24} color={COLORS.textLight} />
+        <TouchableOpacity
+          style={[styles.launchButton, loading && { opacity: 0.7 }]}
+          onPress={handleCreatePlan}
+          disabled={loading}
+        >
+           {loading ? (
+             <ActivityIndicator color={COLORS.textLight} />
+           ) : (
+             <>
+               <Text style={styles.launchButtonText}>Lanzar Plan</Text>
+               <MaterialIcons name="rocket-launch" size={24} color={COLORS.textLight} />
+             </>
+           )}
         </TouchableOpacity>
       </View>
     </SafeAreaView>
