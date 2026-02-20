@@ -1,0 +1,60 @@
+export const Design = {
+  colors: {
+    primary: '#00ffe5',
+    primaryDark: '#00ccb8',
+    backgroundLight: '#f5f8f8',
+    backgroundDark: '#0f2321',
+    glassLight: 'rgba(255, 255, 255, 0.85)',
+    glassDark: 'rgba(15, 35, 33, 0.85)',
+    slate900: '#0f172a',
+    slate800: '#1e293b',
+    slate500: '#64748b',
+    slate400: '#94a3b8',
+    slate200: '#e2e8f0',
+    slate100: '#f1f5f9',
+    white: '#ffffff',
+    black: '#000000',
+    orange500: '#f97316',
+  },
+  borderRadius: {
+    default: 2,
+    lg: 4,
+    xl: 8,
+    xxl: 16,
+    xxxl: 24,
+    full: 9999,
+  },
+  shadows: {
+    glass: {
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 8 },
+      shadowOpacity: 0.08,
+      shadowRadius: 32,
+      elevation: 8,
+    },
+    card: {
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 20 },
+      shadowOpacity: 0.1,
+      shadowRadius: 40,
+      elevation: 20,
+    },
+    glow: {
+      shadowColor: '#00ffe5',
+      shadowOffset: { width: 0, height: 0 },
+      shadowOpacity: 0.4,
+      shadowRadius: 20,
+      elevation: 10,
+    },
+    sm: {
+        shadowColor: "#000",
+        shadowOffset: {
+            width: 0,
+            height: 1,
+        },
+        shadowOpacity: 0.18,
+        shadowRadius: 1.00,
+        elevation: 1,
+    }
+  },
+};
