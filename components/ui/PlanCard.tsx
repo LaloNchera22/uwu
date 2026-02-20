@@ -1,13 +1,14 @@
 import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
-import React, { useState } from 'react';
+import React from 'react';
 import { View, Text, StyleSheet, Pressable, useColorScheme } from 'react-native';
 import { BlurView } from 'expo-blur';
 import { Design } from '@/constants/Design';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { AvatarGroup } from './AvatarGroup';
 
-interface PlanCardProps {
+export interface PlanCardProps {
+  id?: string;
   image: string;
   category: string;
   categoryIcon: any;
@@ -19,9 +20,14 @@ interface PlanCardProps {
   seats: number;
   maxSeats: number;
   isLastSeat?: boolean;
+  isJoined?: boolean;
+  isSaved?: boolean;
+  onJoin?: (id: string) => void;
+  onSave?: (id: string) => void;
 }
 
 export function PlanCard({
+  id,
   image,
   category,
   categoryIcon,
@@ -33,8 +39,11 @@ export function PlanCard({
   seats,
   maxSeats,
   isLastSeat,
+  isJoined = false,
+  isSaved = false,
+  onJoin,
+  onSave,
 }: PlanCardProps) {
-  const [joined, setJoined] = useState(false);
   const isDark = useColorScheme() === 'dark';
 
   return (
@@ -51,7 +60,9 @@ export function PlanCard({
 
         {/* Favorite Button */}
         <BlurView intensity={20} tint="light" style={styles.favoriteButton}>
-           <IconSymbol name="heart" size={24} color={Design.colors.white} />
+           <Pressable onPress={() => id && onSave?.(id)}>
+             <IconSymbol name={isSaved ? "heart.fill" : "heart"} size={24} color={isSaved ? "#ef4444" : Design.colors.white} />
+           </Pressable>
         </BlurView>
 
         {/* Content Overlay */}
@@ -89,11 +100,11 @@ export function PlanCard({
           style={[
               styles.joinButton,
               isDark ? styles.joinButtonDark : styles.joinButtonLight,
-              joined && styles.joinedButton
+              isJoined && styles.joinedButton
           ]}
-          onPress={() => setJoined(!joined)}
+          onPress={() => id && onJoin?.(id)}
         >
-           {joined ? (
+           {isJoined ? (
              <View style={styles.joinedContent}>
                 <IconSymbol name="checkmark.circle" size={20} color={Design.colors.white} />
                 <Text style={styles.joinedText}>¡Apuntado!</Text>
